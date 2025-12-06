@@ -37,7 +37,7 @@ class AppKernel extends Kernel
 }
 ```
 
-For Symfony4 and Symfony5 and Symfony6 and Symfony7, add the Bundle in config/bundles.php (if line not present)
+For Symfony4 and Symfony5 and Symfony6 and Symfony7 and Symfony8, add the Bundle in config/bundles.php (if line not present)
 ```
 <?php
 
@@ -63,7 +63,7 @@ l3_cas_guard:
     gateway: true					# Gateway mode (for use the mode gateway of the Cas Server) set to false if you use micro-services or apis rest.
 ```
 
-For Symfony4 and Symfony5 and Symfony6, add the variables in your config file (.env and .env.dist) :
+For Symfony4 and Symfony5 and Symfony6, add the variables in your config file (.env.local and .env) :
 ```
 ...
 ###> l3/cas-guard-bundle ###
@@ -103,7 +103,7 @@ l3_cas_guard:
 ...
 ```
 
-For Symfony7, add the variables in your config file (.env and .env.dist) :
+For Symfony7 and Symfony8, add the variables in your config file (.env.local and .env) :
 ```
 ...
 ###> l3/cas-guard-bundle ###
@@ -168,7 +168,7 @@ security:
                     - cas.security.authentication.authenticator
 ```
 
-For Symfony6 and Symfony7 :
+For Symfony6 and Symfony7 and Symfony8 :
 ```
 security:
     providers:
@@ -322,7 +322,7 @@ For Symfony 5, replace ***anonymous: true*** with ***lazy: true*** like this :
 
 ```
 
-For Symfony 6 and Symfony7, replace ***anonymous: true*** with ***lazy: true*** like this :
+For Symfony 6 and Symfony7 and Symfony8, replace ***anonymous: true*** with ***lazy: true*** like this :
 ```
         main:
             pattern: ^/
@@ -346,7 +346,7 @@ For Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_
 	...
 ```
 
-For Symfony4 and Symfony5 and Symfony6 and Symfony7, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
+For Symfony4 and Symfony5 and Symfony6 and Symfony7 and Symfony8, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
 ```
         ...
         cas_login_target: '%env(string:CAS_LOGIN_TARGET)%'
@@ -538,6 +538,61 @@ class DefaultController extends AbstractController
 
 ```
 
+For Symfony8, create this controller ***src/Controller/DefaultController.php*** :
+```
+<?php
+
+namespace App\Controller;
+
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class DefaultController extends AbstractController
+{
+    #[Route('/login', name:'login', methods: ['GET'])]
+    public function login(Request $request) {
+           $target = urlencode($this->getParameter('cas_login_target').'/force');
+           $url = 'https://'.$this->getParameter('cas_host') . ((($this->getParameter('cas_port')!=80) || ($this->getParameter('cas_port')!=443)) ? ":".$this->getParameter('cas_port') : "") . $this->getParameter('cas_path') . '/login?service=';
+
+           return $this->redirect($url . $target);
+    }
+    
+    #[Route('/logout', name:'logout', methods: ['GET'])]
+    public function logout(Request $request) {
+        if (($this->getParameter('cas_logout_target') !== null) && (!empty($this->getParameter('cas_logout_target')))) {
+            \phpCAS::logoutWithRedirectService($this->getParameter('cas_logout_target'));
+        } else {
+            \phpCAS::logout();
+        }
+    }
+    
+    #[Route('/force', name:'force', methods: ['GET'])]
+    public function force(Request $request) {
+
+            if ($this->getParameter("cas_gateway")) {
+                if (!isset($_SESSION)) {
+                        session_start();
+                }
+
+                session_destroy();
+            }
+
+            return $this->redirect($this->generateUrl('index'));
+    }
+    
+    
+    #[Route('/', name:'index', methods: ['GET'])]
+    public function index(Request $request) : Response
+    {
+        dump($this->container->get('security.token_storage'));
+        dump($this->getUser());
+        
+        return $this->render('base.html.twig', []);
+    }
+}
+```
 
 
 
@@ -596,7 +651,7 @@ logout:
     controller: L3\Bundle\CasBundle\Controller\LogoutController::logoutAction
 ```
 
-In Symfony 5 or Symfony6 or Symfony7, you must create a logout route in your DefaultController in your application:
+In Symfony 5 or Symfony6 or Symfony7 and Symfony8, you must create a logout route in your DefaultController in your application:
 ```
     /**
      * @Route("/logout", name="logout")
