@@ -3,6 +3,7 @@
 namespace L3\Bundle\CasGuardBundle\Security;
 
 use L3\Bundle\CasGuardBundle\Event\CasAuthenticationFailureEvent;
+use L3\Bundle\CasGuardBundle\Entity\CasUserInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -155,6 +156,10 @@ class CasAuthenticator extends AbstractAuthenticator {
     {
         if (\phpCAS::isSessionAuthenticated()) {
             $token->setAttributes(\phpCAS::getAttributes());
+            $user = $token->getUser();
+            if ($user instanceof CasUserInterface) {
+                $user->setAttributes(\phpCAS::getAttributes());
+            }
         }
         
         return null;
