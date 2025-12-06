@@ -575,12 +575,11 @@ For Symfony6 :
 ...
 $attributes = $this->container->get('security.token_storage')->getToken()->getAttributes();
 ...
-
+```
 
 You can alose get the additional attributes in your User class using the CasUserInterface with this code :
 
 ```
-...
 ...
 use L3\Bundle\CasGuardBundle\Entity\CasUserInterface;
 class MyUserEntity implements CasUserInterface
@@ -593,7 +592,7 @@ class MyUserEntity implements CasUserInterface
     }
 }
 ...
-``````
+```
 
 Annotations
 ---
