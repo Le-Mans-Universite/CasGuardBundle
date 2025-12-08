@@ -158,7 +158,7 @@ class CasAuthenticator extends AbstractAuthenticator {
             $token->setAttributes(\phpCAS::getAttributes());
             $user = $token->getUser();
             if ($user instanceof CasUserInterface) {
-                $user->setAttributes(\phpCAS::getAttributes());
+                $user->setCasAttributes(\phpCAS::getAttributes());
             }
         }
         
